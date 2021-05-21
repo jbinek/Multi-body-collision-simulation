@@ -8,25 +8,25 @@ from scipy.constants import g
 
 pg.init()
 
-# Circle Properties
-circle_r = 0.025  # m
+# Circle Properties, disks actually
+circle_r_min, circle_r_max = 0.025, 0.06  # m, m
 circle_v_min, circle_v_max = 0.01, 0.2  # m/s, m/s
 circle_height, circle_density = 0.5, 480  # m, kg/m^3
 px_per_m = 750  # Pixel per meter
-circle_quantity = 10
-seizure = False
+circle_quantity = 10  # initial number of circles
+seizure = False  # konfiskata, atak?
 
 # Window
 win_width, win_height = 1050, 750
-win_width_temp, win_height_temp = win_width, win_height
+win_width_tempwin_width_temp, win_height_temp = win_width, win_height
 win_width_min, win_height_min = 200, 200
 info = pg.display.Info()
 win = pg.display.set_mode([win_width, win_height], pg.RESIZABLE)
 full = False  # Fullscreen
 
 # Time
-time_0 = time.time()
-time_d = time.time() - time_0
+time_0 = time.time()  # start time
+time_d = time.time() - time_0  # current time
 
 # Mouse
 mouse_pos = np.array(pg.mouse.get_pos())
@@ -36,19 +36,19 @@ mouse_f_abs = 1
 g_toggle = False
 g_amp = 1
 
-# Aesthetic
-hud = True
+# Menu
+menu = True
 font = pg.font.SysFont('trebuchetms', 25)
 
 
 # Circle
 class Circle(object):
     def __init__(self, pos, rad, v):
-        # Physical Properties
-        self.pos = np.array(pos)
-        self.r = rad * px_per_m
-        self.v = np.array(v) * px_per_m
-        self.m = np.pi * rad ** 2 * circle_height * circle_density
+        # Physical Properties, no friction considered so no spinning, it makes  it easier to calculate the collisions
+        self.pos = np.array(pos)  # position
+        self.r = rad * px_per_m   # radius
+        self.v = np.array(v) * px_per_m  # velocity
+        self.m = np.pi * rad ** 2 * circle_height * circle_density  # volume of the disk
 
         # Logic
         self.prev_collision = None
@@ -60,8 +60,8 @@ class Circle(object):
         # Physics
         c = circle.pos - self.pos
         v_c = (c[0] * self.v[0] + c[1] * self.v[1]) / (
-                c[0] ** 2 + c[1] ** 2) * c  # Velocity component in direction of collision
-        v_t = self.v - v_c  # Velocity component tangent to direction of collision
+                    c[0] ** 2 + c[1] ** 2) * c  # Velocity component in direction of collision / Składowa prędkości w kierunku zderzenia
+        v_t = self.v - v_c  # Velocity component tangent to direction of collision / Składowa prędkości styczna do kierunku zderzenia
 
         circle_c = self.pos - circle.pos
         circle_v_c = (circle_c[0] * circle_v[0] + circle_c[1] * circle_v[1]) / (
@@ -114,7 +114,7 @@ def rPos():
 
 
 def rRad():
-    return r(circle_r, circle_r)
+    return r(circle_r_min, circle_r_max)
 
 
 def rVel():
