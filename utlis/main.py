@@ -18,7 +18,7 @@ seizure = False  # konfiskata, atak?
 
 # Window
 win_width, win_height = 1050, 750
-win_width_tempwin_width_temp, win_height_temp = win_width, win_height
+win_width_temp, win_height_temp = win_width, win_height
 win_width_min, win_height_min = 200, 200
 info = pg.display.Info()
 win = pg.display.set_mode([win_width, win_height], pg.RESIZABLE)
