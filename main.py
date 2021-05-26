@@ -4,16 +4,17 @@ from numpy.linalg import norm as Abs
 import time
 from random import uniform as r
 from random import randint as rint
+from scipy.constants import g
 
 pg.init()
 
 # Circle properties, disks actually
-circle_r_min, circle_r_max = 0.025, 0.025  # m, m
+circle_r_min, circle_r_max = 0.008, 0.02  # m, m
 circle_v_min, circle_v_max = 0.01, 0.2  # m/s, m/s
 circle_height, circle_density = 0.5, 480  # m, kg/m^3
 px_per_m = 750  # Pixel per meter
 circle_quantity = 10  # initial number of circles
-seizure = False
+seizure = True
 
 # Window
 win_width, win_height = 1050, 750
@@ -26,6 +27,10 @@ full = False  # Fullscreen
 # Time
 time_0 = time.time()  # start time
 time_d = time.time() - time_0  # current time
+
+# Gravity
+g_toggle = False
+g_amp = 1
 
 # Menu
 menu = True
@@ -81,6 +86,9 @@ class Circle(object):
             # Logic
             self.prev_collision = None
 
+    def gravity(self):
+        self.v = self.v + np.array([0, g_amp * g]) * time_d * px_per_m
+
     def move(self):
         self.pos = self.pos + self.v * time_d
 
@@ -113,15 +121,27 @@ while run:
         # Keyboard
         elif event.type == pg.KEYDOWN:
             # Circle
-            if event.key == pg.K_r:
-                circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
-            elif event.key == pg.K_UP:
-                circle_quantity += 1
+            if event.key == pg.K_UP:
+                if circle_quantity >= 100:
+                    circle_quantity = 100
+                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+                else:
+                    circle_quantity += 1
+                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
             elif event.key == pg.K_DOWN:
                 if circle_quantity <= 0:
                     circle_quantity = 0
+                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
                 else:
                     circle_quantity -= 1
+                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+            # Gravity
+            elif event.key == pg.K_g:
+                g_toggle = not g_toggle
+            elif event.key == pg.K_t:
+                g_amp = round(g_amp + 0.1, 1)
+            elif event.key == pg.K_b:
+                g_amp = round(g_amp - 0.1, 1)
             # Aesthetic
             elif event.key == pg.K_c:
                 seizure = not seizure
@@ -165,6 +185,8 @@ while run:
 
     for circle in circles:
         circle.wall_collide()
+        if g_toggle:
+            circle.gravity()
 
     for circle in circles:
         circle.move()
@@ -174,6 +196,11 @@ while run:
 
     for circle in circles:
         circle.draw()
+
+    gravity_text = font.render(
+        "Switch gravity: " + ("On" if g_toggle else "Off") + " | T and B: Amplify G: " + str(g_amp),
+        False, (0, 0, 0))
+    win.blit(gravity_text, (0, win_height - font.size("a")[1] * 3))
 
     circle_text = font.render(
         "Number of circles: " + str(circle_quantity),
