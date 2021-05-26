@@ -198,9 +198,14 @@ while run:
         circle.draw()
 
     gravity_text = font.render(
-        "Switch gravity: " + ("On" if g_toggle else "Off") + " | T and B: Amplify G: " + str(g_amp),
+        "Switch gravity: " + ("On" if g_toggle else "Off"),
         False, (0, 0, 0))
     win.blit(gravity_text, (0, win_height - font.size("a")[1] * 3))
+
+    circle_text = font.render(
+        "Amplify / decrease gravity (t/b): " + str(g_amp),
+        False, (0, 0, 0))
+    win.blit(circle_text, (0, win_height - font.size("a")[1] * 2))
 
     circle_text = font.render(
         "Number of circles: " + str(circle_quantity),
