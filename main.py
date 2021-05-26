@@ -118,7 +118,10 @@ while run:
             elif event.key == pg.K_UP:
                 circle_quantity += 1
             elif event.key == pg.K_DOWN:
-                circle_quantity -= 1
+                if circle_quantity <= 0:
+                    circle_quantity = 0
+                else:
+                    circle_quantity -= 1
             # Aesthetic
             elif event.key == pg.K_c:
                 seizure = not seizure
