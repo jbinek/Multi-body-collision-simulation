@@ -117,9 +117,9 @@ clock = pg.time.Clock()
 # Main
 run = True
 u = 0
-time_list = [time_0]
-square_list = []
-mean_square_displacement_list = []
+collisions_counter = 0
+collisions_list = []
+collisions_dict = {collisions_counter: time_0}
 while run:
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -170,12 +170,10 @@ while run:
                 win_height = win_height_min
             win = pg.display.set_mode([win_width, win_height], pg.RESIZABLE)
             time_d, time_0 = time.time() - time_0, time.time()
-            time_list.append(time_d)
 
     # Time
     time_d, time_0 = time.time() - time_0, time.time()
     clock.tick()
-    time_list.append(time_d)
 
     # Action
     for i, circle_1 in enumerate(circles[:-1]):
@@ -186,6 +184,8 @@ while run:
                     circle_v_1 = circle_1.v
                     circle_1.circle_collide(circle_2, circle_2.v)
                     circle_2.circle_collide(circle_1, circle_v_1)
+                    collisions_counter += 1
+                    collisions_dict[collisions_counter] = time_0
 
                 circle_dist_new = circle_dist * (circle_1.r + circle_2.r) / Abs(circle_dist)
                 circle_1.pos = circle_1.pos - (circle_dist_new - circle_dist) / 2
@@ -204,14 +204,6 @@ while run:
 
     for circle in circles:
         circle.draw()
-
-    for circle in circles:
-        displacement = circle.pos - circle.initPos
-        displacement = np.linalg.norm(displacement)  # magnitude of vector
-        square = pow(displacement, 2)
-        msd = np.mean(square)
-        mean_square_displacement_list.append(msd)
-        print(msd)
 
     if pg.time.get_ticks() >= 250 * u:
         fps_text = font.render("Fps: " + str(int(clock.get_fps())), False, (0, 0, 0))
@@ -236,3 +228,7 @@ while run:
     pg.display.update()
 
 pg.quit()
+collisions_list.append(collisions_counter)
+print(collisions_counter)
+print(u)
+print(collisions_dict)
