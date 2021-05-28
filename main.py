@@ -39,9 +39,10 @@ font = pg.font.SysFont('trebuchetms', 25)
 
 # Circle
 class Circle(object):
-    def __init__(self, pos, rad, v):
+    def __init__(self, initPos, pos, rad, v):
         # Physical Properties, no friction considered so no spinning, it makes  it easier to calculate the collisions
         self.pos = np.array(pos)  # position
+        self.initPos = np.array(initPos)
         self.r = rad * px_per_m  # radius
         self.v = np.array(v) * px_per_m  # velocity
         self.m = np.pi * rad ** 2 * circle_height * circle_density  # volume of the disk
@@ -110,10 +111,15 @@ def rVel():
 
 
 # Setup
-circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+init_pos = rPos()
+circles = [Circle(rPos(), rPos(), rRad(), rVel()) for i in range(circle_quantity)]
 clock = pg.time.Clock()
 # Main
 run = True
+u = 0
+time_list = [time_0]
+square_list = []
+mean_square_displacement_list = []
 while run:
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -124,17 +130,17 @@ while run:
             if event.key == pg.K_UP:
                 if circle_quantity >= 100:
                     circle_quantity = 100
-                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+                    circles = [Circle(rPos(), rPos(), rRad(), rVel()) for i in range(circle_quantity)]
                 else:
                     circle_quantity += 1
-                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+                    circles = [Circle(rPos(), rPos(), rRad(), rVel()) for i in range(circle_quantity)]
             elif event.key == pg.K_DOWN:
                 if circle_quantity <= 0:
                     circle_quantity = 0
-                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+                    circles = [Circle(rPos(), rPos(), rRad(), rVel()) for i in range(circle_quantity)]
                 else:
                     circle_quantity -= 1
-                    circles = [Circle(rPos(), rRad(), rVel()) for i in range(circle_quantity)]
+                    circles = [Circle(rPos(), rPos(), rRad(), rVel()) for i in range(circle_quantity)]
             # Gravity
             elif event.key == pg.K_g:
                 g_toggle = not g_toggle
@@ -164,10 +170,12 @@ while run:
                 win_height = win_height_min
             win = pg.display.set_mode([win_width, win_height], pg.RESIZABLE)
             time_d, time_0 = time.time() - time_0, time.time()
+            time_list.append(time_d)
 
     # Time
     time_d, time_0 = time.time() - time_0, time.time()
     clock.tick()
+    time_list.append(time_d)
 
     # Action
     for i, circle_1 in enumerate(circles[:-1]):
@@ -196,6 +204,19 @@ while run:
 
     for circle in circles:
         circle.draw()
+
+    for circle in circles:
+        displacement = circle.pos - circle.initPos
+        displacement = np.linalg.norm(displacement)  # magnitude of vector
+        square = pow(displacement, 2)
+        msd = np.mean(square)
+        mean_square_displacement_list.append(msd)
+        print(msd)
+
+    if pg.time.get_ticks() >= 250 * u:
+        fps_text = font.render("Fps: " + str(int(clock.get_fps())), False, (0, 0, 0))
+        u += 1
+        win.blit(fps_text, (win_width - fps_text.get_rect()[2], 0))
 
     gravity_text = font.render(
         "Switch gravity: " + ("On" if g_toggle else "Off"),
